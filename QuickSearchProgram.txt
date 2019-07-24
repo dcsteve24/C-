@@ -1,0 +1,73 @@
+/********************************************************************************************************
+					Steven Craig
+
+
+Part 1: Before attempting this implementation, you choose to develop a simple prototype version of this
+algorithm in C++. Specifically, you will build an in-place, order reversal algorithm. This algorithm will
+take as an input an array of ints and will reverse the order of the elements in the array, in place 
+(essentially using only the memory in the array). For example, if the array contains five elements 
+[1,2,3,4,5], the output of the algorithm will be [5,4,3,2,1]. Comment your program.
+
+I chose quicksort to solve this problem because it has the best performance in the average case and is 
+known for the fastest in-place sorting algortihm. 
+
+Quick sort is a divide and conquer algorithm. It picks an element as a pivot point and partitions the
+given array around the picked pivot.
+
+Finally, by using a random pivot, we increase the time complexity of the algorithm.
+
+**********************************************************************************************************/
+
+#include <iostream> //For outputs
+#include <ctime> //For time use for random seed under Main
+#include <cstdlib> //For random; srand and rand under PivotGenerator function
+#include <array> //For size of array in main
+
+using namespace std;
+
+void QuickSort(int array[], int arrayLow, int arrayHigh) {
+//Sorts array, placing all larger element values which are larger than the pivot before the pivot point. Reruns itself until only a array of 1,
+//continuing to divide and conquer over and over until solved.
+	if (arrayLow < arrayHigh) { //Runs only if array size is more than 1 																						
+		int randomPivot = arrayLow + rand() % (arrayHigh - arrayLow); //Generates a random number between the low and high 									
+		std::swap(array[randomPivot], array[arrayHigh]); //swaps the random pivot with the highest element -- Near completley prevents worst case													
+		int pivotValue = array[arrayHigh]; //The random pivot point entry from the array 																		
+		int index = (arrayLow - 1); //Index of the lowest element 																								
+	
+		//Sort the elements with greater to smaller based on pivot point
+		for (int x = arrayLow; x <= arrayHigh - 1; x++) { 																						  				
+			if (array[x] >= pivotValue) { //if the value is greater than the pivot point, swap it																
+				index++;																														   				
+				std::swap(array[index], array[x]);																												
+			}
+		}
+
+		std::swap(array[index + 1], array[arrayHigh]); //increments index and swaps with the array high	
+		randomPivot = (index + 1); //increments the random pivot before recursivly calling itself 																
+
+		//Divide and Conquer
+		QuickSort(array, arrayLow, randomPivot - 1); //Recursive Call -- Sort Lower Half																		
+		QuickSort(array, randomPivot + 1, arrayHigh); //Recursive Call -- Sort Higher Half																		
+	}
+}
+
+//Driver code to test functions
+int main()
+{
+    srand(time(NULL)); //Sets a new seed for better randomization
+//	int array[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 }; //Sets test array -- worst case
+	int array[] = { 10, 9, 8, 7, 6, 5, 4, 3, 2, 1 }; //Sets test array -- best case
+	int arraySize = sizeof(array)/sizeof(array[0]); //Give size of array
+	QuickSort(array, 0, arraySize - 1); //Call the Quicksort function
+	
+	//Prints to terminal the element values in array by looping through them (put this at the end of the function to watch it sort)
+	printf("Backwards sorted array: \n");
+	for (int x = 0; x < arraySize; x++) {
+		printf("%d ", array[x]);
+	}
+	printf("\n");
+
+	return 0; //End
+}
+
+

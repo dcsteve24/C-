@@ -1,0 +1,122 @@
+/********************************************************************************************************
+					Steven Craig
+
+Task: You plan to design a greedy algorithm to efficiently transfer media to storage devices. Note that 
+this is an optimization problem. Optimization problems have a general structure and consist of some quantity 
+to be maximized or minimized under some list of constraints. In this problem, you have n files (f1, ..., fn)
+with corresponding sizes (in MBs) s1, ... sn. Your goal is to store these files onto m disks, d1, ..., dm,
+that have corresponding storages amounts t1, ..., tm. Note that one file cannot be spread across multiple
+disks. In this problem, the goal is to minimize the amount of storage that is not used on each disk (that is
+used). This should also minimize the total number of number of disks being used. That is, you would like to
+fill up each disk as much as possible while leaving a minimally small amount of unused storage. (In the perfect
+case, each disk would be perfectly filled, and there would be no unused storage.) If there are any disks left
+unused, you will be able to return them for a refund. 
+
+**********************************************************************************************************/
+
+#include <iostream> //For outputs
+#include <bits/stdc++.h>
+#include <ctime> //For time use for random seed under Main
+#include <cstdlib> //For random; srand and rand
+
+using namespace std;
+
+//declare a new class for files and drives
+struct item { 
+	public:
+		string name;
+		double size;
+
+		item() {} //Default constructor
+		
+		item(string n, double s) {
+			name = n;
+			size = s;
+		}
+};
+
+//declare a new class for the mapping
+struct diskmap {
+	public:
+		string disk;
+		string file;
+		
+		diskmap() {} //Default constructor
+
+		diskmap(string d, string f) {
+			disk = d;
+			file = f;
+		}
+};
+
+//Since our goal is to use the fewest disks possible, sort descending
+//Sorts the array so the largest size is element 0
+//Uses QuickSort algorithm with random pivot
+void QuickSort(item array[], int arrayLow, int arrayHigh) {
+	if (arrayLow < arrayHigh) { //Runs only if array size is more than 1
+		int randomPivot = arrayLow + rand() % (arrayHigh - arrayLow); //Generates a random number between the low and highvideo
+		swap(array[randomPivot], array[arrayHigh]); //Swaps random pivot with highest element
+		int pivotValue = array[arrayHigh].size; //sets the random pivots element's size value 
+		int index = (arrayLow - 1); //Index of the lowest element
+	
+		//Sort the elements with greater to smaller based on pivot point
+		for (int x = arrayLow; x <= arrayHigh - 1; x++) {
+				if (array[x].size >= pivotValue) { //if the value is greater than or equal to the pivot value, swap it
+					index++;
+					swap(array[index], array[x]);
+				}
+		}
+		
+		swap(array[index + 1], array[arrayHigh]); //increments the index and swaps witht the last element
+		randomPivot = (index + 1); //increments the random pivot before calling recursivley itself
+		
+		//Divide and Conquer
+		QuickSort(array, arrayLow, randomPivot - 1); //Recursive Call -- Sort Lower Half
+		QuickSort(array, randomPivot + 1, arrayHigh); //Recursive Call -- Sort Higher Half
+	}
+}
+
+//Overload the operator to read the diskmap class
+ostream& operator<<(ostream& os, const diskmap& d) {
+	return os << d.file << " || " << d.disk;
+}
+
+void PrintOutput(diskmap array[], int arraySize){
+	cout << "The following is where each file would be stored:\n";
+	cout << "---------------\n";
+	cout << "Filename || Disk\n";
+	cout << "---------------\n";
+	for (int x = 0; x < arraySize; x++) {
+		cout << array[x] << "\n";
+	}
+}
+
+/* The Driving Function to bring it all together. Calls the Quicksort function to sort both files and disks,
+then places the files on the first disk they fit in. Since sorted the files will be placed on the largest
+drives first. */
+void GreedyAlgorithm (item files[], item disks[], diskmap map[], int fileArraySize, int diskArraySize) {
+	QuickSort(files, 0, fileArraySize); //Sort files in descending order by size
+	QuickSort(disks, 0, diskArraySize); //Sort disks in descending order by size
+	
+	for (int x = 0; x <= fileArraySize; x++) { //Loop through the files
+		for (int y = 0; y < diskArraySize; y++){//Loop through the disks
+			if (files[x].size <= disks[y].size) { //if file size is less than the remaining disk size
+				map[x] = {disks[y].name, files[x].name}; //Store the file in the drive
+				disks[y].size -= files[x].size; //Reduce the drive size by the amount stored
+				y = diskArraySize; //break the disk loop to move to the next file
+			}
+		}
+	}
+}
+
+// Driver program to test above function 
+int main() { 
+	item fileArray[] = {{"A", 50}, {"B", 2}, {"C", 4}, {"D", 8}, {"E", 16}, {"F", 32}, {"G", 64}, {"H", 128}, {"I", 256}, {"J", 3}, {"K", 6}, {"L", 12}, {"M", 24}, {"N", 48}, {"O", 96}, {"P", 192}, {"Q", 384}, {"R", 5}, {"S", 10}, {"T", 15}, {"U", 20}, {"V", 25}, {"W", 30}, {"X", 35}, {"Y", 40}, {"Z", 45}};
+	item diskArray[] = {{"disk1", 100}, {"disk2", 500}, {"disk3", 200}, {"disk4", 400}, {"disk5", 300}, {"disk6", 400}, {"disk7", 500}, {"disk8", 400}, {"disk9", 300}, {"disk10", 200}};
+	int fileArraySize = sizeof(fileArray)/sizeof(fileArray[0]);
+	int diskArraySize = sizeof(diskArray)/sizeof(diskArray[0]);
+	diskmap map[fileArraySize];
+	GreedyAlgorithm(fileArray, diskArray, map, fileArraySize - 1, diskArraySize - 1);
+	PrintOutput(map, fileArraySize);
+	return 0;
+} 

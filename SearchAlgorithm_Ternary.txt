@@ -1,0 +1,89 @@
+/********************************************************************************************************
+
+					Steven Craig
+
+Task code a search algorithm that searches a list of strings for a particular song. The searching algorithm
+will have two inputs: the playlist, which is a string array that contains a list of songs in alphabetical order;
+and a particular song, which is a string. If the song is found in the list, the algorithm will return the index
+of the song, and it will return -1 otherwise. This searching algorithm will employ a divide-and-conquer approach
+similar to that in binary search, but with a slight variation. In binary search, a list is split in 2 sublists
+during each step; however, for your assignment, you will build and algorithm that splits the list into 3 sublists
+during each step. 
+
+Note: self identified error which on certain false search sizes it errors out. Wasn't worth it to fix this for 
+this project
+
+**********************************************************************************************************/
+
+#include <iostream> //For outputs
+#include <stdio.h>
+#include <conio.h>
+#include <bits/stdc++.h>
+
+using namespace std;
+
+int TenarySearch(string playlist[], int left, int right, string song) {
+	transform(song.begin(), song.end(), song.begin(), ::tolower); //make the song all lower case for easier comparison
+	char songChars[song.length()]; //initialize array the size of desired song
+	strcpy(songChars, song.c_str()); //set the desired song to be individual chars for later comparison
+	
+	if (right >= 1){
+		int middle1 = left + (right - left)/3;
+		int middle2 = right - (right - left)/3;
+		transform(playlist[middle1].begin(), playlist[middle1].end(), playlist[middle1].begin(), ::tolower); //set middle1 playlist song to all lower case
+		transform(playlist[middle2].begin(), playlist[middle2].end(), playlist[middle2].begin(), ::tolower); //set middle2 playlist song to all lower case
+		
+		//See if match at middle1
+		if (playlist[middle1] == song){
+			return middle1;
+		}
+		//see if match at middle2
+		else if (playlist[middle2] == song) {
+			return middle2;
+		}
+		
+		//Convert playlist songs to chars for comparision
+		char playlistM1Chars[playlist[middle1].length()]; //initialize M1 array the size of current playlist song
+		strcpy(playlistM1Chars, playlist[middle1].c_str()); //sets the current M1 playlist song to be individual chars for later comparision
+		char playlistM2Chars[playlist[middle2].length()]; //initialize M2 array the size of current playlist song
+		strcpy(playlistM2Chars, playlist[middle2].c_str()); //sets the current M2 playlist song to be individual chars for later comparision			
+		
+		for (int x = 0; x < song.length(); x++) {  //while x is less than the song length
+			if (songChars[x] < playlistM1Chars[x]) { //If song on left third
+				return TenarySearch(playlist, 0, middle1 - 1, song);
+				x = song.length(); //break
+			}
+			else if (songChars[x] > playlistM2Chars[x]) { //If song on right third
+				return TenarySearch(playlist, middle2 + 1, right, song);
+				x = song.length(); //break
+			}
+			else if (playlistM1Chars[x] == playlistM2Chars[x]) { //If split lines up (aka not found), end
+				x = song.length(); //break
+			}
+			else {	//Song is in the middle one third
+				return TenarySearch(playlist, middle1 + 1, middle2 - 1, song);
+				x = song.length(); //break
+			}
+		}
+	}
+
+	//Element is not present
+	return -1;
+}
+
+// Driver program to test above function 
+int main() 
+{ 
+	string playlist[] = {"ATest","BTest","CTest","DTest","ETest","FTest","GTest","HTest", "HTesty", "ITest","JTest","KTest","LTest","MTest","NTest","OTest","PTest","QTest","RTest","Song","TTest","UTest","VTest","WTest","XTest","YTest","ZTest"}; 
+    int playlistSize = sizeof(playlist)/sizeof(playlist[0]);
+	string song = "Song";
+    int result = TenarySearch(playlist, 0, playlistSize+1, song);
+	if (result == -1) {
+		cout << "The song " << song << " was not found";
+		return result;
+	}
+	else {
+		cout << "The song " << song << " was found at position " << result;
+		return 0;
+	}
+} 
